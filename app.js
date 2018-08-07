@@ -5,6 +5,7 @@ var express = require('express')
 	, http = require('http')
   , https = require('https')
   , bodyParser = require('body-parser')
+  , multer = require('multer')
   , compression = require('compression')
   , cookieParser = require('cookie-parser')
   , morgan = require('morgan')
@@ -97,8 +98,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // submit pkg
 
-  app.post('/package', passport.authenticate(auth_type, { session: false }), pkg.add);
-  app.put('/package', passport.authenticate(auth_type, { session: false }), pkg.add_version);
+  app.post('/package', passport.authenticate(auth_type, { session: false }), multer().single('pkg'), pkg.add);
+  app.put('/package', passport.authenticate(auth_type, { session: false }), multer().single('pkg'), pkg.add_version);
 
 // deprecation
 

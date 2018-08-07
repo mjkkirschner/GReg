@@ -307,11 +307,11 @@ function add_pkg(pkg_data, done){
       .attach('pkg', 'test/uploads/pkg_test.zip')
       .end(function(err, res){
 
+        console.error( 'pkg_add_result', res.body);
+
         if (err) {
           return done(err);
         }
-
-        console.error( 'pkg_add_result', res.body);
 
         should.equal(res.body.success, true);
 

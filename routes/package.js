@@ -487,7 +487,7 @@ exports.add = function(req, res) {
     return res.status(400).send(error.fail('You did not provide a pkg_header'));
   }
 
-  if (!req.files.pkg){
+  if (!req.file) {
     return res.status(400).send(error.fail('You did not provide a pkg file'));
   }
 
@@ -517,7 +517,7 @@ exports.add_version = function(req, res) {
     return res.status(400).send(error.fail('You did not provide a pkg_header'));
   }
 
-  if (!req.files.pkg){
+  if (!req.file){
     return res.status(400).send(error.fail('You did not provide a pkg file'));
   }
 
