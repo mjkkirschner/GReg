@@ -18,4 +18,4 @@ app.NavigationView = Backbone.View.extend({
 		console.log(args);
 	}
 
-
+});

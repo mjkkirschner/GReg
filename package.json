@@ -4,7 +4,17 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "test": "mocha"
+    "test": "mocha",
+    "eslint": "eslint ."
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true
+    },
+    "parserOptions": {
+      "ecmaVersion": "2015"
+    },
+    "extends": "airbnb-base"
   },
   "dependencies": {
     "async": "0.2.6",
@@ -35,6 +45,9 @@
     "underscore": "1.4.4"
   },
   "devDependencies": {
+    "eslint": "^5.3.0",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-plugin-import": "^2.13.0",
     "mocha": "^5.2.0",
     "should": "1.2.2",
     "supertest": "^3.1.0"
