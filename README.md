@@ -9,8 +9,8 @@ Run the command ```npm install ``` to get the latest packages
 [note that this is not set in config file. This has to be in environment variables]
  1. GREG_DB_NAME -  Database name. 
  2. GREG_DB_URL - mongodb URL
- 3. accessKeyId - AWS access key
- 4. secretAccessKey - AWS secret key.
+ 3. AWSAccessKeyId - AWS access key
+ 4. AWSSecretKey - AWS secret key.
  5. NODE_ENV - Node Environment [dev / production]
  6. GREG_USE_OXYGEN - specify true or false. if false, basic authentication will be used.
  7. PORT - Port where the server will run. default: 8080

@@ -1,7 +1,13 @@
+require('dotenv').config()
+
 var express = require('express')
   , app = express()
 	, http = require('http')
-	, https = require('https')
+  , https = require('https')
+  , bodyParser = require('body-parser')
+  , compression = require('compression')
+  , cookieParser = require('cookie-parser')
+  , morgan = require('morgan')
 	, fs = require('fs')
     , path = require('path')
     , mongoose = require('mongoose')
@@ -37,20 +43,17 @@ var express = require('express')
 // Express Config
 ////////////////////////
 
-  app.configure(function() {
-    app.use(express.logger());
-    app.use(express.compress());
-    app.set('views', __dirname + '/views');
-    app.set('view engine', 'jade')
-    app.engine('html', require('ejs').renderFile);
-    app.use(express.cookieParser());
-    app.use(express.bodyParser());
-    app.use(pkg.postPut);
-    app.use(gdpr.postPut);
-		app.use(passport.initialize());
-    app.use(app.router);
-    app.use(express.static(path.join(__dirname, 'public')));
-  });
+app.use(morgan('combined'));
+app.use(compression());
+app.set('views', __dirname + '/views');
+app.set('view engine', 'pug')
+app.engine('html', require('ejs').renderFile);
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(pkg.postPut);
+app.use(gdpr.postPut);
+app.use(passport.initialize());
+app.use(express.static(path.join(__dirname, 'public')));
 
 ////////////////////////
 // Routes

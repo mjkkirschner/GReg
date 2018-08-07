@@ -86,7 +86,7 @@ exports.deprecate_by_engine_and_name = function(req, res) {
   
   packages.by_engine_and_name( engine, name, function(err, pkg){
     
-    if (err) return res.send(404, error.fail('The package does not exist'));
+    if (err) return res.status(404).send(error.fail('The package does not exist'));
     packages.set_pkg_deprecation( req, true, pkg._id, res );
   
   });
@@ -107,7 +107,7 @@ exports.undeprecate_by_engine_and_name = function(req, res) {
 
   packages.by_engine_and_name( engine, name, function(err, pkg){
     
-    if (err) return res.send(404, error.fail('The package does not exist'));
+    if (err) return res.status(404).send(error.fail('The package does not exist'));
     packages.set_pkg_deprecation( req, false, pkg._id, res );
   
   });
@@ -162,7 +162,7 @@ exports.upvote_by_engine_and_name = function(req, res) {
 
   packages.by_engine_and_name( engine, name, function(err, pkg){
     
-    if (err) return res.send(404, error.fail('The package does not exist'));
+    if (err) return res.status(404).send(error.fail('The package does not exist'));
     packages.vote( pkg._id, user_id, 1, res );
   
   });
@@ -184,7 +184,7 @@ exports.downvote_by_engine_and_name = function(req, res) {
 
   packages.by_engine_and_name( engine, name, function(err, pkg){
     
-    if (err) return res.send(404, error.fail('The package does not exist'));
+    if (err) return res.status(404).send(error.fail('The package does not exist'));
     packages.vote( pkg._id, user_id, -1, res );
   
   });
@@ -206,7 +206,7 @@ exports.comment_by_id = function(req, res) {
   if (req.body && req.body.comment){
     packages.comment( pkg_id, user_id, req.body.comment, res );
   } else {
-    return res.send(403, error.fail("You cannot send an empty comment."));
+    return res.status(403).send(error.fail("You cannot send an empty comment."));
   }
 
 };
@@ -226,11 +226,11 @@ exports.comment_by_engine_and_name = function(req, res) {
 
   packages.by_engine_and_name( engine, name, function(err, pkg){
     
-    if (err) return res.send(404, error.fail('The package does not exist'));
+    if (err) return res.status(404).send(error.fail('The package does not exist'));
     if (req.body && req.body.comment){
       packages.comment( pkg._id, user_id, req.body.comment, res );
     } else {
-      return res.send(403, error.fail("You cannot send an empty comment."));
+      return res.status(403).send(error.fail("You cannot send an empty comment."));
     }
   
   });
@@ -258,7 +258,7 @@ exports.download_last_vers = function(req, res) {
       try {
         return res.send( error.fail("Could not find package") );
       } catch (exception) {
-        return res.send(500, error.fail("Failed to obtain package"));
+        return res.status(500).send(error.fail("Failed to obtain package"));
       }
     }
 
@@ -272,10 +272,10 @@ exports.download_last_vers = function(req, res) {
             return res.redirect( pkg.versions[pkg.versions.length-1].url )
         }
     } catch (exception) {
-      return res.send(500, error.fail('Failed to obtain package version' ));
+      return res.status(500).send(error.fail('Failed to obtain package version'));
     }
 
-    return res.send(500, error.fail('Something unexpected happened' ));
+    return res.status(500).send(error.fail('Something unexpected happened' ));
 
   });
 
@@ -302,7 +302,7 @@ exports.download_vers = function(req, res) {
       try {
         return res.send( error.fail("Could not find package") );
       } catch (exception) {
-        res.send(500, error.fail('Failed to obtain the package' ));
+        res.status(500).send(error.fail('Failed to obtain the package' ));
         return console.log('Log error - failed to download a package with id: ' + id);
       }
     }
@@ -323,12 +323,12 @@ exports.download_vers = function(req, res) {
                     return res.redirect( pkg.versions[i].url )
                 }
         } catch (exception) {
-          return res.send(500, error.fail('Failed to redirect' ));
+          return res.status(500).send(error.fail('Failed to redirect' ));
         }
       }
     }
 
-    return res.send(404, error.fail('The version you specified does not exist' ));
+    return res.status(404).send(error.fail('The version you specified does not exist'));
 
   });
 
@@ -353,7 +353,7 @@ exports.by_id = function(req, res) {
       try {
         return res.send( error.fail("Could not find package") );
       } catch (exception) {
-        res.send(500, error.fail('Failed to obtain the package' ));
+        res.status(500).send(error.fail('Failed to obtain the package'));
         return console.log('Log error - failed to download a package with id: ' + id);
       }
     }
@@ -362,7 +362,7 @@ exports.by_id = function(req, res) {
     try {
       return res.send(data);
     } catch (exception) {
-      res.send(500, error.fail('Failed to send data' ));
+      res.status(500).send(error.fail('Failed to send data'));
       return console.log('Log error');
     }
 
@@ -392,7 +392,7 @@ exports.all = function(req, res) {
       try {
         return res.send( error.fail("There are no packages") );
       } catch (exception) {
-        res.send(500, error.fail('Error obtaining packages' ));
+        res.status(500).send(error.fail('Error obtaining packages'));
         return console.log('Log error');
       }
     }
@@ -403,7 +403,7 @@ exports.all = function(req, res) {
 		try {
       return res.send( data );
     } catch (exception) {
-      res.send(500, error.fail('Failed to send data' ));
+      res.status(500).send(error.fail('Failed to send data'));
       return console.log('Log error');
     }
 
@@ -432,7 +432,7 @@ exports.by_engine = function(req, res) {
 
     if ( err || !pkgs || pkgs.length === 0 )
     {
-      res.send( 404, error.fail("There are no packages with that engine name") );
+      res.status(404).send(error.fail("There are no packages with that engine name"));
       return;
     }
 
@@ -463,7 +463,7 @@ exports.by_engine_and_name = function(req, res) {
 
     if ( err || !pkg )
     {
-      return res.send( 404, error.fail("There is no package with that engine and package name") );
+      return res.status(404).send(error.fail("There is no package with that engine and package name"));
     }
 
     var data = error.success_with_content('Found package', pkg);
@@ -484,11 +484,11 @@ exports.by_engine_and_name = function(req, res) {
 exports.add = function(req, res) {
 
   if (!req.body.pkg_header){
-    return res.send(400, error.fail('You did not provide a pkg_header'));
+    return res.status(400).send(error.fail('You did not provide a pkg_header'));
   }
 
   if (!req.files.pkg){
-    return res.send(400, error.fail('You did not provide a pkg file'));
+    return res.status(400).send(error.fail('You did not provide a pkg file'));
   }
 
   var pkg = JSON.parse( req.body.pkg_header );
@@ -514,11 +514,11 @@ exports.add = function(req, res) {
 exports.add_version = function(req, res) {
 
   if (!req.body.pkg_header){
-    return res.send(400, error.fail('You did not provide a pkg_header'));
+    return res.status(400).send(error.fail('You did not provide a pkg_header'));
   }
 
   if (!req.files.pkg){
-    return res.send(400, error.fail('You did not provide a pkg file'));
+    return res.status(400).send(error.fail('You did not provide a pkg file'));
   }
 
   var pkg = JSON.parse( req.body.pkg_header );
@@ -527,7 +527,7 @@ exports.add_version = function(req, res) {
     try {
       return res.send(result);
     } catch (exception) {
-      return res.send(500, error.fail('Failed to save package version'));
+      return res.status(500).send(error.fail('Failed to save package version'));
     }
   });
 
@@ -555,7 +555,7 @@ exports.remove = function(req, res) {
 exports.whitelist_by_id = function(req, res){
 
   if(!req.user.super_user){
-      return res.send(403, error.fail('Adding packages to the white list is only allowed for super users.'));
+      return res.status(403).send(error.fail('Adding packages to the white list is only allowed for super users.'));
   };
 
   var id = req.params.pkg_id;
@@ -563,14 +563,14 @@ exports.whitelist_by_id = function(req, res){
   packages.whitelist_by_id(id, function(err, num) {
 
     if ( err ) {
-      return res.send(500, error.fail(err));
+      return res.status(500).send(error.fail(err));
     }
     
     if(num === 0){
-        return res.send(404, error.fail("No packages were updated."));
+        return res.status(404).send(error.fail("No packages were updated."));
     }
     
-    return res.send(201, error.success(num + " packages updated successfully."));
+    return res.status(201).send(error.success(num + " packages updated successfully."));
 
   });
 };
@@ -584,7 +584,7 @@ exports.whitelist_by_id = function(req, res){
 exports.unwhitelist_by_id = function(req,res){
     
     if(!req.user.super_user){
-      return res.send(403, error.fail('Removing packages from the white list is only allowed for super users.'));
+      return res.status(403).send(error.fail('Removing packages from the white list is only allowed for super users.'));
     };
 
     var id = req.params.pkg_id;
@@ -592,14 +592,14 @@ exports.unwhitelist_by_id = function(req,res){
     packages.unwhitelist_by_id(id, function(err, num) {
 
         if ( err ) {
-        return res.send(500, error.fail(err));
+        return res.status(500).send(error.fail(err));
         }
         
         if(num === 0){
-            return res.send(404, error.fail("No packages were updated."));
+            return res.status(404).send(error.fail("No packages were updated."));
         }
         
-        return res.send(201, error.success(num + " packages updated successfully."));
+        return res.status(201).send(error.success(num + " packages updated successfully."));
 
     });
 }
@@ -614,9 +614,9 @@ exports.all_whitelist = function(req, res){
 
     packages.all_whitelist(function(err, pkgs){
         if(err || !pkgs){
-            return res.send(500, error.fail('Could not get white listed packages'));
+            return res.status(500).send(error.fail('Could not get white listed packages'));
         }
-        return res.send(200,error.success_with_content("Succesfully retrieved white listed packages.", pkgs));
+        return res.status(200).send(error.success_with_content("Succesfully retrieved white listed packages.", pkgs));
     });
 };
 
