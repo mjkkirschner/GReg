@@ -193,19 +193,15 @@ describe('Package route tests.', function(){
         
         it('GET should return an empty list if there are no white listed pacakges.', function(done){
             request
-                .put('/whitelist/' + pkg_id)
+                .get('/whitelist/')
                 .auth('test','e0jlZfJfKS')
-                .expect(201)
-                .end(function(err,res){
-                    if(err) {
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
                         return done(err);
                     }
-                    
-                    PackageModel.find({whitelist:true}, function(err, pkgs){
-                        if(err) done(err);
-                        (pkgs).should.be.empty;
-                        done();
-                    });
+                    res.body.content.length.should.equal(0);
+                    done();
                 });
         })
         
@@ -237,7 +233,7 @@ describe('Package route tests.', function(){
                     if(err) {
                         return done(err);
                     }
-                    res.body.length.should.equal(1);
+                    res.body.content.length.should.equal(1);
                     done();
                 });
         });

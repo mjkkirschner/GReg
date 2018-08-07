@@ -594,8 +594,8 @@ exports.unwhitelist_by_id = function(req,res){
         if ( err ) {
         return res.status(500).send(error.fail(err));
         }
-        
-        if(num === 0){
+
+        if (num === 0){
             return res.status(404).send(error.fail("No packages were updated."));
         }
         
