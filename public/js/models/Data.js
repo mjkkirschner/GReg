@@ -4,32 +4,33 @@ app.Data = Backbone.Model.extend({
 
   defaults: {
     current_model: undefined,
-		downloading: false
+    downloading: false,
   },
 
-	getAuthor: function(id){
-			
-			this.set('downloading', true );
-			var model = new app.Author();
-			model.urlRoot = '/user/' + id;
-			var that = this;
-			model.fetch({success: function(){
-				that.set('downloading', false);	
-				that.set('current_model', model);
-			}});
-	},
+  getAuthor(id) {
+    this.set('downloading', true);
+    const model = new app.Author();
+    model.urlRoot = `/user/${id}`;
+    const that = this;
+    model.fetch({
+      success() {
+        that.set('downloading', false);
+        that.set('current_model', model);
+      },
+    });
+  },
 
-	getPackage: function(id){
-				
-			this.set('downloading', true );
-			var model = new app.Package();
-			model.urlRoot = '/package/' + id;
-			var that = this;
-			model.fetch({success: function(){
-				that.set('downloading', false);	
-				that.set('current_model', model);
-			}});
-	}
+  getPackage(id) {
+    this.set('downloading', true);
+    const model = new app.Package();
+    model.urlRoot = `/package/${id}`;
+    const that = this;
+    model.fetch({
+      success() {
+        that.set('downloading', false);
+        that.set('current_model', model);
+      },
+    });
+  },
 
 });
-

@@ -1,18 +1,17 @@
 var app = app || {};
 
 
+const StatsList = Backbone.Collection.extend({
 
-var StatsList = Backbone.Collection.extend({
-
-  url: function() {
+  url() {
     return '/stats?limit=8';
-  } ,
+  },
 
   model: app.Stat,
 
-  parse : function(resp) { 
+  parse(resp) {
     return resp.content;
-  }
+  },
 
 });
 

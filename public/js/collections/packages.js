@@ -1,31 +1,29 @@
-  // js/collections/todos.js
+// js/collections/todos.js
 
-  var app = app || {};
+var app = app || {};
 
-  // Package Collection
-  // ---------------
+// Package Collection
+// ---------------
 
-  var PackageList = Backbone.Collection.extend({
+const PackageList = Backbone.Collection.extend({
 
-    url: function() {
-      return '/packages/';
-    } ,
+  url() {
+    return '/packages/';
+  },
 
-    // Reference to this collection's model.
-    model: app.Package,
-    query: "",
+  // Reference to this collection's model.
+  model: app.Package,
+  query: '',
 
-    parse : function(resp) {
-      return resp.content;
-    },
+  parse(resp) {
+    return resp.content;
+  },
 
-    search: function(query) {
+  search(query) {
+    this.query = query;
+    this.fetch();
+  },
 
-      this.query = query;
-      this.fetch();
+});
 
-    }
-
-  });
-
-  app.Packages = new PackageList();
+app.Packages = new PackageList();

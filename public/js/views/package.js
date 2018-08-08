@@ -1,4 +1,4 @@
- // js/view/packages.js
+// js/view/packages.js
 
 var app = app || {};
 
@@ -8,37 +8,35 @@ app.PackageView = Backbone.View.extend({
 
   className: 'package',
 
-  template: _.template( $('#item-template').html() ),
+  template: _.template($('#item-template').html()),
 
   events: {
-	   'click': 'expand' 
+	   click: 'expand',
   },
 
-  toggleDeps: function(event) {
+  toggleDeps(event) {
     this.$('.deps-container').toggle();
     this.$('.full_deps-container').toggle();
     event.preventDefault();
-		event.stopPropagation();
+    event.stopPropagation();
   },
 
-  expand: function(event) {
-		app.currentData.getPackage( this.model.id );
-		//this.$('.data-container').toggle();
-	}, 
+  expand(event) {
+    app.currentData.getPackage(this.model.id);
+    // this.$('.data-container').toggle();
+  },
 
-  initialize: function() {
+  initialize() {
     this.listenTo(this.model, 'change', this.render);
   },
 
-  render: function() {
-    
-		this.$el.html( this.template( this.model.toJSON() ) );
-    
-    if (this.model.get('deprecated')){
+  render() {
+    this.$el.html(this.template(this.model.toJSON()));
+
+    if (this.model.get('deprecated')) {
       this.$el.addClass('deprecated');
     }
     return this;
-    
-  }
+  },
 
 });

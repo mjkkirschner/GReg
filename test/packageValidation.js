@@ -1,347 +1,266 @@
-var packages = require('../lib/packages')
-	, mocha = require('mocha')
-  , should = require('should');
+const should = require('should');
+const packages = require('../lib/packages');
 
-describe('packages.validate_base_pkg_data', function(){
+describe('packages.validate_base_pkg_data', () => {
+  it('should say the package is bady formed when the package name is too short', () => {
+    const pkg_data = { name: '' };
+    const pkg_data1 = { name: 'a' };
+    const pkg_data2 = { name: 'aa' };
 
-	it('should say the package is bady formed when the package name is too short', function(){
+    should.exist(packages.validate_base_pkg_data(pkg_data));
+    should.equal(false, packages.validate_base_pkg_data(pkg_data).success);
+    should.exist(packages.validate_base_pkg_data(pkg_data1));
+    should.equal(false, packages.validate_base_pkg_data(pkg_data1).success);
+    should.exist(packages.validate_base_pkg_data(pkg_data2));
+    should.equal(false, packages.validate_base_pkg_data(pkg_data2).success);
+  });
 
-		var pkg_data = {name: ''}
-		var pkg_data1 = {name: 'a'}
-		var pkg_data2 = {name: 'aa'}
+  it('should return nothing when the package data is an empty object', () => {
+    const pkg_data = {};
+    should.equal(null, packages.validate_base_pkg_data(pkg_data));
+  });
 
-		should.exist( packages.validate_base_pkg_data( pkg_data ) );
-		should.equal( false, packages.validate_base_pkg_data( pkg_data ).success );
-		should.exist( packages.validate_base_pkg_data( pkg_data1 ) );
-		should.equal( false, packages.validate_base_pkg_data( pkg_data1 ).success );
-		should.exist( packages.validate_base_pkg_data( pkg_data2 ) );
-		should.equal( false, packages.validate_base_pkg_data( pkg_data2 ).success  );
+  it('should return error object when any of the dependencies have no version', () => {
+    const pkg_data = { dependencies: [{ name: 'bla' }, { name: 'bloo', version: '0.0.1' }] };
 
-	});
+    should.equal(false, packages.validate_base_pkg_data(pkg_data).success);
+  });
 
-	it('should return nothing when the package data is an empty object', function(){
+  it('should return error object when any of the dependencies have badly formed version', () => {
+    const pkg_data = { dependencies: [{ name: 'bloo', version: '0.0.x1' }] };
 
-		var pkg_data = {};
-		should.equal( null, packages.validate_base_pkg_data( pkg_data ) );
+    should.equal(false, packages.validate_base_pkg_data(pkg_data).success);
+  });
 
-	});
+  it('should return error object when the description is too short', () => {
+    const pkg_data = { description: '' };
+    should.equal(false, packages.validate_base_pkg_data(pkg_data).success);
+  });
 
-	it('should return error object when any of the dependencies have no version', function(){
+  it('should return error object when there are duplicate keywords', () => {
+    const pkg_data = { keywords: ['ok', 'ok'] };
+    should.equal(false, packages.validate_base_pkg_data(pkg_data).success);
+  });
 
-		var pkg_data = { dependencies: [{name: "bla"}, {name: "bloo", version: "0.0.1"}] };
+  it('should return error object when there are too many keywords', () => {
+    const pkg_data = { keywords: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'] };
 
-		should.equal( false, packages.validate_base_pkg_data( pkg_data ).success );
+    should.equal(false, packages.validate_base_pkg_data(pkg_data).success);
+  });
 
-	});
-
-	it('should return error object when any of the dependencies have badly formed version', function(){
-
-		var pkg_data = { dependencies: [{name: "bloo", version: "0.0.x1"}] };
-
-		should.equal( false, packages.validate_base_pkg_data( pkg_data ).success );
-
-	});
-
-	it('should return error object when the description is too short', function(){
-
-		var pkg_data = { description: "" };
-		should.equal( false, packages.validate_base_pkg_data( pkg_data ).success );
-
-	});
-
-	it('should return error object when there are duplicate keywords', function(){
-
-		var pkg_data = { keywords: ["ok", "ok"] };
-		should.equal( false, packages.validate_base_pkg_data( pkg_data ).success );
-
-	});
-
-	it('should return error object when there are too many keywords', function(){
-
-		var pkg_data = { keywords: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"] };
-
-		should.equal( false, packages.validate_base_pkg_data( pkg_data ).success );
-
-	});
-
-	it('should return null when the license is supported', function(){
-
-		var pkg_data = { license: "MIT" };
-		should.not.exist( packages.validate_base_pkg_data( pkg_data ) );
-
-	});
-
+  it('should return null when the license is supported', () => {
+    const pkg_data = { license: 'MIT' };
+    should.not.exist(packages.validate_base_pkg_data(pkg_data));
+  });
 });
 
-describe('packages.validate_version_string', function(){
+describe('packages.validate_version_string', () => {
+  it('should say the string is well-formed when a string of form \'digits.digits.digits\'', () => {
+    const max_value = 100;
+    let major = 0;
+    let minor = 0;
+    let rev = 0;
+    let vers_string = '';
+
+    for (let i = 0; i < 1000; i++) {
+      major = Math.floor(Math.random() * max_value);
+      minor = Math.floor(Math.random() * max_value);
+      rev = Math.floor(Math.random() * max_value);
+
+      vers_string = `${major.toString()}.${minor.toString()}.${rev.toString()}`;
+
+      should.equal(true, packages.validate_version_string(vers_string));
+    }
+  });
+
+  it('should say the string is well-formed when a string of form \'~digits.digits.digits\'', () => {
+    const max_value = 100;
+    let major = 0;
+    let minor = 0;
+    let rev = 0;
+    let vers_string = '';
+
+    for (let i = 0; i < 1000; i++) {
+      major = Math.floor(Math.random() * max_value);
+      minor = Math.floor(Math.random() * max_value);
+      rev = Math.floor(Math.random() * max_value);
+
+      vers_string = `~${major.toString()}.${minor.toString()}.${rev.toString()}`;
+
+      should.equal(true, packages.validate_version_string(vers_string));
+    }
+  });
+
+  it('should say the string is well-formed when a string of form \'~digits.digits.*\'', () => {
+    const max_value = 100;
+    let major = 0;
+    let minor = 0;
+    let vers_string = '';
+
+    for (let i = 0; i < 1000; i++) {
+      major = Math.floor(Math.random() * max_value);
+      minor = Math.floor(Math.random() * max_value);
+
+      vers_string = `~${major.toString()}.${minor.toString()}.*`;
+
+      should.equal(true, packages.validate_version_string(vers_string));
+    }
+  });
+
+  it('should say the string is well-formed when a string of form \'digits.digits.*\'', () => {
+    const max_value = 100;
+    let major = 0;
+    let minor = 0;
+    let vers_string = '';
+
+    for (let i = 0; i < 1000; i++) {
+      major = Math.floor(Math.random() * max_value);
+      minor = Math.floor(Math.random() * max_value);
+
+      vers_string = `${major.toString()}.${minor.toString()}.*`;
 
-	it('should say the string is well-formed when a string of form \'digits.digits.digits\'', function(){
+      should.equal(true, packages.validate_version_string(vers_string));
+    }
+  });
+
+  it('should say the string is well-formed when a string of form \'>=digits.digits.*\'', () => {
+    const max_value = 100;
+    let major = 0;
+    let minor = 0;
+    let vers_string = '';
 
-		var max_value = 100
-			, major = 0
-			, minor = 0
-			, rev = 0
-			, vers_string = "";
+    for (let i = 0; i < 1000; i++) {
+      major = Math.floor(Math.random() * max_value);
+      minor = Math.floor(Math.random() * max_value);
 
-		for (var i = 0; i < 1000; i++) {
+      vers_string = `>=${major.toString()}.${minor.toString()}.*`;
 
-			major = Math.floor( Math.random() * 100 );
-			minor = Math.floor( Math.random() * 100 );
-			rev = Math.floor( Math.random() * 100 );
+      should.equal(true, packages.validate_version_string(vers_string));
+    }
+  });
 
-			vers_string = major.toString() + '.' + minor.toString() + '.' + rev.toString();
+  it('should say the string is well-formed when a string of form \'>=digits.digits.digits\'', () => {
+    const max_value = 100;
+    let major = 0;
+    let minor = 0;
+    let rev = 0;
+    let vers_string = '';
 
-			should.equal( true, packages.validate_version_string( vers_string ) );
+    for (let i = 0; i < 1000; i++) {
+      major = Math.floor(Math.random() * max_value);
+      minor = Math.floor(Math.random() * max_value);
+      rev = Math.floor(Math.random() * max_value);
 
-		}
+      vers_string = `>=${major.toString()}.${minor.toString()}.${rev.toString()}`;
 
-	});
+      should.equal(true, packages.validate_version_string(vers_string));
+    }
+  });
 
-	it('should say the string is well-formed when a string of form \'~digits.digits.digits\'', function(){
 
-		var max_value = 100
-			, major = 0
-			, minor = 0
-			, rev = 0
-			, vers_string = "";
+  it('should say the string is badly-formed when a string of form \'.digits.digits\'', () => {
+    const max_value = 1000;
+    let minor = 0;
+    let rev = 0;
+    let vers_string = '';
 
-		for (var i = 0; i < 1000; i++) {
+    for (let i = 0; i < max_value; i++) {
+      minor = Math.floor(Math.random() * max_value);
+      rev = Math.floor(Math.random() * max_value);
 
-			major = Math.floor( Math.random() * 100 );
-			minor = Math.floor( Math.random() * 100 );
-			rev = Math.floor( Math.random() * 100 );
+      vers_string = `.${minor.toString()}.${rev.toString()}`;
 
-			vers_string = '~' + major.toString() + '.' + minor.toString() + '.' + rev.toString();
+      should.equal(false, packages.validate_version_string(vers_string));
+    }
+  });
 
-			should.equal( true, packages.validate_version_string( vers_string ) );
+  it('should say the string is badly-formed when a string of form \'digits.digits\'', () => {
+    const max_value = 1000;
+    let minor = 0;
+    let rev = 0;
+    let vers_string = '';
 
-		}
+    for (let i = 0; i < max_value; i++) {
+      minor = Math.floor(Math.random() * max_value);
+      rev = Math.floor(Math.random() * max_value);
 
-	});
+      vers_string = `${minor.toString()}.${rev.toString()}`;
 
-	it('should say the string is well-formed when a string of form \'~digits.digits.*\'', function(){
+      should.equal(false, packages.validate_version_string(vers_string));
+    }
+  });
 
-		var max_value = 100
-			, major = 0
-			, minor = 0
-			, rev = 0
-			, vers_string = "";
+  it('should say the string is badly-formed when a string of form \'digits\'', () => {
+    const max_value = 1000;
+    let minor = 0;
+    let vers_string = '';
 
-		for (var i = 0; i < 1000; i++) {
+    for (let i = 0; i < max_value; i++) {
+      minor = Math.floor(Math.random() * max_value);
 
-			major = Math.floor( Math.random() * 100 );
-			minor = Math.floor( Math.random() * 100 );
-			rev = Math.floor( Math.random() * 100 );
+      vers_string = minor.toString();
 
-			vers_string = '~' + major.toString() + '.' + minor.toString() + '.*';
+      should.equal(false, packages.validate_version_string(vers_string));
+    }
+  });
 
-			should.equal( true, packages.validate_version_string( vers_string ) );
+  it('should say the string is badly-formed when a string of form \'>=digits\'', () => {
+    const max_value = 1000;
+    let minor = 0;
+    let vers_string = '';
 
-		}
+    for (let i = 0; i < max_value; i++) {
+      minor = Math.floor(Math.random() * max_value);
 
-	});
+      vers_string = `>=${minor.toString()}`;
 
-	it('should say the string is well-formed when a string of form \'digits.digits.*\'', function(){
+      should.equal(false, packages.validate_version_string(vers_string));
+    }
+  });
 
-		var max_value = 100
-			, major = 0
-			, minor = 0
-			, rev = 0
-			, vers_string = "";
+  it('should say the string is badly-formed when a string of form \'>=digits.*\'', () => {
+    const max_value = 1000;
+    let minor = 0;
+    let vers_string = '';
 
-		for (var i = 0; i < 1000; i++) {
+    for (let i = 0; i < max_value; i++) {
+      minor = Math.floor(Math.random() * max_value);
 
-			major = Math.floor( Math.random() * 100 );
-			minor = Math.floor( Math.random() * 100 );
-			rev = Math.floor( Math.random() * 100 );
+      vers_string = `>=${minor.toString()}.*`;
 
-			vers_string = major.toString() + '.' + minor.toString() + '.*';
+      should.equal(false, packages.validate_version_string(vers_string));
+    }
+  });
 
-			should.equal( true, packages.validate_version_string( vers_string ) );
+  it('should say the string is badly-formed when a string of form \'..\'', () => {
+    should.equal(false, packages.validate_version_string('..'));
+  });
 
-		}
+  it('should say the string is badly-formed when a string of form \'digits..\'', () => {
+    const max_value = 1000;
+    let minor = 0;
+    let vers_string = '';
 
-	});
+    for (let i = 0; i < max_value; i++) {
+      minor = Math.floor(Math.random() * max_value);
 
-	it('should say the string is well-formed when a string of form \'>=digits.digits.*\'', function(){
+      vers_string = `${minor.toString()}..`;
 
-		var max_value = 100
-			, major = 0
-			, minor = 0
-			, rev = 0
-			, vers_string = "";
+      should.equal(false, packages.validate_version_string(vers_string));
+    }
+  });
 
-		for (var i = 0; i < 1000; i++) {
+  it('should say the string is badly-formed when a string of form \'digits..*\'', () => {
+    const max_value = 1000;
+    let minor = 0;
+    let vers_string = '';
 
-			major = Math.floor( Math.random() * 100 );
-			minor = Math.floor( Math.random() * 100 );
+    for (let i = 0; i < max_value; i++) {
+      minor = Math.floor(Math.random() * max_value);
 
-			vers_string = '>=' + major.toString() + '.' + minor.toString() + '.*';
+      vers_string = `${minor.toString()}..*`;
 
-			should.equal( true, packages.validate_version_string( vers_string ) );
-
-		}
-
-	});
-
-	it('should say the string is well-formed when a string of form \'>=digits.digits.digits\'', function(){
-
-		var max_value = 100
-			, major = 0
-			, minor = 0
-			, rev = 0
-			, vers_string = "";
-
-		for (var i = 0; i < 1000; i++) {
-
-			major = Math.floor( Math.random() * max_value );
-			minor = Math.floor( Math.random() * max_value );
-			rev = Math.floor( Math.random() * max_value );
-
-			vers_string = '>=' + major.toString() + '.' + minor.toString() + '.' + rev.toString();
-
-			should.equal( true, packages.validate_version_string( vers_string ) );
-
-		}
-
-	});
-
-
-	it('should say the string is badly-formed when a string of form \'.digits.digits\'', function(){
-
-		var max_value = 1000
-			, minor = 0
-			, rev = 0
-			, vers_string = "";
-
-		for (var i = 0; i < max_value; i++) {
-
-			minor = Math.floor( Math.random() * max_value );
-			rev = Math.floor( Math.random() * max_value );
-
-			vers_string = '.' + minor.toString() + '.' + rev.toString();
-
-			should.equal( false, packages.validate_version_string( vers_string ) );
-
-		}
-
-	});
-
-	it('should say the string is badly-formed when a string of form \'digits.digits\'', function(){
-
-		var max_value = 1000
-			, major = 0
-			, minor = 0
-			, rev = 0
-			, vers_string = "";
-
-		for (var i = 0; i < max_value; i++) {
-
-			minor = Math.floor( Math.random() * max_value );
-			rev = Math.floor( Math.random() * max_value );
-
-			vers_string = minor.toString() + '.' + rev.toString();
-
-			should.equal( false, packages.validate_version_string( vers_string ) );
-
-		}
-
-	});
-
-	it('should say the string is badly-formed when a string of form \'digits\'', function(){
-
-		var max_value = 1000
-			, minor = 0
-			, vers_string = "";
-
-		for (var i = 0; i < max_value; i++) {
-
-			minor = Math.floor( Math.random() * max_value );
-
-			vers_string = minor.toString();
-
-			should.equal( false, packages.validate_version_string( vers_string ) );
-
-		}
-
-	});
-
-	it('should say the string is badly-formed when a string of form \'>=digits\'', function(){
-
-		var max_value = 1000
-			, minor = 0
-			, vers_string = "";
-
-		for (var i = 0; i < max_value; i++) {
-
-			minor = Math.floor( Math.random() * max_value );
-
-			vers_string = '>=' + minor.toString();
-
-			should.equal( false, packages.validate_version_string( vers_string ) );
-
-		}
-
-	});
-
-	it('should say the string is badly-formed when a string of form \'>=digits.*\'', function(){
-
-		var max_value = 1000
-			, minor = 0
-			, vers_string = "";
-
-		for (var i = 0; i < max_value; i++) {
-
-			minor = Math.floor( Math.random() * max_value );
-
-			vers_string = '>=' + minor.toString() + '.*';
-
-			should.equal( false, packages.validate_version_string( vers_string ) );
-
-		}
-
-	});
-
-	it('should say the string is badly-formed when a string of form \'..\'', function(){
-
-		should.equal( false, packages.validate_version_string( '..' ) );
-
-	});
-
-	it('should say the string is badly-formed when a string of form \'digits..\'', function(){
-
-		var max_value = 1000
-			, minor = 0
-			, vers_string = "";
-
-		for (var i = 0; i < max_value; i++) {
-
-			minor = Math.floor( Math.random() * max_value );
-
-			vers_string = minor.toString() + '..';
-
-			should.equal( false, packages.validate_version_string( vers_string ) );
-
-		}
-
-	});
-
-	it('should say the string is badly-formed when a string of form \'digits..*\'', function(){
-
-		var max_value = 1000
-			, minor = 0
-			, vers_string = "";
-
-		for (var i = 0; i < max_value; i++) {
-
-			minor = Math.floor( Math.random() * max_value );
-
-			vers_string = minor.toString() + '..*';
-
-			should.equal( false, packages.validate_version_string( vers_string ) );
-
-		}
-
-	});
-
+      should.equal(false, packages.validate_version_string(vers_string));
+    }
+  });
 });
