@@ -56,7 +56,7 @@ TBD
 ## Response Format
 All requests from the database are returned in JSON format with the following format:
 
-```json
+```
     {
         "success": <Boolean>,
         "timestamp": <in ms since the Unix epoch>,
