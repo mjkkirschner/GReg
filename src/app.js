@@ -54,7 +54,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(pkg.postPut);
 app.use(passport.initialize());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // //////////////////////
 // Routes

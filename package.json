@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app.js",
+    "start": "node src/app.js",
     "test": "mocha",
-    "eslint": "eslint --ext .html,.js ."
+    "eslint": "eslint --ext .html,.js .",
+    "mongo": "docker run --name mongodb -p 27017:27017 -d mongo:latest"
   },
   "dependencies": {
     "async": "0.2.6",

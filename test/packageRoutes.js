@@ -3,10 +3,10 @@ const should = require('should');
 const crypto = require('crypto');
 const fs = require('fs');
 
-const app = require('../app.js');
-const user = require('../lib/users.js');
-const PackageModel = require('../models/package.js').PackageModel;
-const UserModel = require('../models/user.js').UserModel;
+const app = require('../src/app.js');
+const user = require('../src/lib/users.js');
+const PackageModel = require('../src/models/package.js').PackageModel;
+const UserModel = require('../src/models/user.js').UserModel;
 
 request = request(app);
 

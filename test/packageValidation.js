@@ -1,5 +1,5 @@
 const should = require('should');
-const packages = require('../lib/packages');
+const packages = require('../src/lib/packages');
 
 describe('packages.validate_base_pkg_data', () => {
   it('should say the package is bady formed when the package name is too short', () => {
