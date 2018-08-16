@@ -203,7 +203,7 @@ function user_sort_by(field_to_sort_on, limit, callback) {
   UserModel
     .find({})
     .where('num_maintained_packages').gt(0)
-    .select('username email first_name last_name last_updated_package'
+    .select('username last_updated_package'
       + 'num_maintained_packages num_votes_for_maintained_packages num_downloads_for_maintained_packages')
     .populate('last_updated_package', 'latest_version_update')
     .sort(field_to_sort_on)
