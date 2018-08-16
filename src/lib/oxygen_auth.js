@@ -66,7 +66,7 @@ BadRequestError.prototype.__proto__ = Error.prototype;
  * @param {Object} req
  * @api protected
  */
-Strategy.prototype.authenticate = (req, options) => {
+Strategy.prototype.authenticate = function(req, options) {
   options = options || {};
 
   const self = this;

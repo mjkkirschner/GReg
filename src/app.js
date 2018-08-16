@@ -1,5 +1,11 @@
-require('dotenv').config();
+const fs = require('fs');
+const dotenv = require('dotenv');
 
+if (fs.existsSync('.env')) {
+  dotenv.config();
+}
+
+const constants = require('constants');
 const express = require('express');
 
 const app = express();
@@ -9,7 +15,7 @@ const multer = require('multer');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
-const fs = require('fs');
+
 const path = require('path');
 const mongoose = require('mongoose');
 const passport = require('passport');
@@ -98,8 +104,8 @@ app.put('/tou', passport.authenticate(auth_type, { session: false }), user.accep
 
 // submit pkg
 
-app.post('/package', passport.authenticate(auth_type, { session: false }), multer().single('pkg'), pkg.add);
-app.put('/package', passport.authenticate(auth_type, { session: false }), multer().single('pkg'), pkg.add_version);
+app.post('/package', multer().single('pkg'), passport.authenticate(auth_type, { session: false }), pkg.add);
+app.put('/package', multer().single('pkg'), passport.authenticate(auth_type, { session: false }), pkg.add_version);
 
 // deprecation
 
@@ -175,7 +181,12 @@ const crtfn = 'ssl/server.crt';
 if (fs.existsSync(keyfn) || fs.existsSync(crtfn)) {
   const key = fs.readFileSync(keyfn, 'utf8');
   const crt = fs.readFileSync(crtfn, 'utf8');
-  const cred = { key, cert: crt };
+  const options = {
+    key,
+    cert: crt,
+    // TODO: uncomment this to reject TLS1.0 connections
+    // secureOptions: constants.SSL_OP_NO_TLSv1,
+  };
 
   server = https.createServer(cred, app).listen(443, () => {
     console.log('✔ Secure Express server listening on port %d in %s mode', 443, app.get('env'));
