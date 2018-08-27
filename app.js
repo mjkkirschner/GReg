@@ -24,7 +24,7 @@ var express = require('express')
   var mongoDbName = process.env.GREG_DB_NAME || "greg-dev";
   var mongoDbUrl = process.env.GREG_DB_URL || "mongodb://localhost:27017/";
 	var mongoUri = mongoDbUrl + mongoDbName;	
-
+/*
   mongoose.connect(mongoUri, function(err) {
     if (!err) {
        console.log('Connected to MongoDB at ' + mongoUri);
@@ -32,7 +32,7 @@ var express = require('express')
         throw err;
       }
   });
-
+*/
 ////////////////////////
 // Express Config
 ////////////////////////
@@ -157,14 +157,14 @@ app.post('/gdprDeleteRequest', gdpr.handleGDPRRRequest);
 var server;
 
   var port = process.env.PORT || 8080;
-	var keyfn = 'ssl/server.key';
-	var crtfn = 'ssl/server.crt';
+	var keyfn = 'greg/ssl/server.key';
+	var crtfn = 'greg/ssl/server.crt';
 
 	if ( fs.existsSync( keyfn ) || fs.existsSync( crtfn ) ){
 
 	  var key = fs.readFileSync(keyfn, 'utf8');
 	  var crt = fs.readFileSync(crtfn, 'utf8');
-	  var cred = { key: key, cert: crt };
+	  var cred = { key: key, cert: crt, secureProtocol: "TLSv1_2_method" };
 
 	  server = https.createServer(cred, app).listen(443, function() {
 	    console.log("✔ Secure Express server listening on port %d in %s mode", 443, app.get('env'));
