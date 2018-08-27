@@ -25,6 +25,7 @@ var express = require('express')
   var mongoDbUrl = process.env.GREG_DB_URL || "mongodb://localhost:27017/";
 	var mongoUri = mongoDbUrl + mongoDbName;	
 /*
+// temp disable database for local dev.
   mongoose.connect(mongoUri, function(err) {
     if (!err) {
        console.log('Connected to MongoDB at ' + mongoUri);
@@ -163,7 +164,10 @@ var server;
 	if ( fs.existsSync( keyfn ) || fs.existsSync( crtfn ) ){
 
 	  var key = fs.readFileSync(keyfn, 'utf8');
-	  var crt = fs.readFileSync(crtfn, 'utf8');
+    var crt = fs.readFileSync(crtfn, 'utf8');
+    // disable all connections which are not TLS 1.2 connections.
+    // documented: https://www.openssl.org/docs/man1.1.0/ssl/SSLv23_method.html
+    // and here: https://nodejs.org/docs/latest-v4.x/api/tls.html (search secureProtocol)
 	  var cred = { key: key, cert: crt, secureProtocol: "TLSv1_2_method" };
 
 	  server = https.createServer(cred, app).listen(443, function() {
