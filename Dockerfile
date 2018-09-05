@@ -16,3 +16,8 @@ COPY src src
 COPY test test
 
 ENTRYPOINT [ "npm", "start" ]
+
+ARG build_name
+LABEL build_name=$build_name
+ARG build_commit
+LABEL build_commit=$build_commit
