@@ -5,6 +5,8 @@ if (fs.existsSync('.env')) {
   dotenv.config();
 }
 
+require('newrelic');
+
 const constants = require('constants');
 const express = require('express');
 
