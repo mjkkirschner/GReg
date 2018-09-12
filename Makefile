@@ -12,10 +12,10 @@ build:
 	cp .env build/
 
 docker_build:
-	docker build -t ${DOCKER_ORG}/package-manager:${DOCKER_TAG} .
+	docker build -t ${DOCKER_ORG}/dynamopm:${DOCKER_TAG} .
 
 docker_push:
-	docker push ${DOCKER_ORG}/package-manager:${DOCKER_TAG}
+	docker push ${DOCKER_ORG}/dynamopm:${DOCKER_TAG}
 
 docker_clean:
-	docker rmi -f ${DOCKER_ORG}/package-manager:${DOCKER_TAG} || true
+	docker rmi -f ${DOCKER_ORG}/dynamopm:${DOCKER_TAG} || true
