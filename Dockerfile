@@ -1,7 +1,10 @@
 FROM artifactory.dev.adskengineer.net/quantum-devops/cloudos-v2/base-nodejs8:latest AS build
 
 WORKDIR /src
-RUN addgroup -S greg; adduser -S greg greg
+RUN adduser greg
+
+RUN yum -y update && yum -y install make gcc gcc-c++
+RUN npm i -g npm@latest
 
 COPY . /src/
 RUN make build
@@ -13,7 +16,7 @@ WORKDIR /srv
 ENTRYPOINT [ "npm", "start" ]
 
 COPY --from=build /etc/passwd /etc/group /etc/
-COPY --from=build --chown greg:greg /src/build /srv
+COPY --from=build --chown=greg:greg /src/build /srv
 
 ARG build_name
 LABEL build_name=$build_name
