@@ -1,21 +1,19 @@
-FROM artifactory.dev.adskengineer.net/quantum-devops/cloudos-v2/base-nodejs8:latest
+FROM artifactory.dev.adskengineer.net/quantum-devops/cloudos-v2/base-nodejs8:latest AS build
 
-RUN yum -y update && yum -y install make gcc gcc-c++ && yum clean all
+WORKDIR /src
+
+RUN yum -y update && yum -y install make gcc gcc-c++
 RUN npm i -g npm@latest
 
+COPY . /src/
+RUN make build
+
+FROM artifactory.dev.adskengineer.net/quantum-devops/cloudos-v2/base-nodejs8:latest
+
 WORKDIR /srv
+CMD [ "npm", "start" ]
 
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-RUN npm ci 
-
-COPY .env .env
-
-COPY public public
-COPY src src
-COPY test test
-
-ENTRYPOINT [ "npm", "start" ]
+COPY --from=build /src/build /srv
 
 ARG build_name
 LABEL build_name=$build_name
