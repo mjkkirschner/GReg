@@ -8,6 +8,8 @@ DOCKER_TAG=SAFE_BRANCH_NAME + "-${BUILD_VERSION}"
 DOCKER_ARGS="DOCKER_ORG=${DOCKER_ORG} DOCKER_TAG=${DOCKER_TAG}"
 currentBuild.displayName = DOCKER_TAG
 
+buildArgs="${DOCKER_ARGS} BUILD_NAME=${DOCKER_TAG}"
+
 @Library('PSL@master') _
 
 node('cloud&&centos') { timestamps {
@@ -16,7 +18,9 @@ node('cloud&&centos') { timestamps {
 
         // pull source, then force cleanup of untracked files and dirs
         stage('Pull source') {
-            checkout scm
+            def gitInfo = checkout scm
+            def gitCommit = gitInfo["GIT_COMMIT"]
+            buildArgs = buildArgs + " BUILD_COMMIT=${gitCommit}"
             sh "git clean -fxd"
         }
 
@@ -49,7 +53,7 @@ node('cloud&&centos') { timestamps {
         }
 
         stage('Build') {
-            sh "${DOCKER_ARGS} make docker_build"
+            sh "${buildArgs} make docker_build"
         }
 
         stage('Test') {
@@ -68,11 +72,11 @@ node('cloud&&centos') { timestamps {
         stage('Docker Push') {
             try {
                 docker.withRegistry(DOCKER_REGISTRY, DOCKER_CREDENTIALS) {
-                    sh "${DOCKER_ARGS} make docker_push"
+                    sh "${buildArgs} make docker_push"
                 }
             } finally {
                 stage("Cleanup docker image") {
-                    sh "${DOCKER_ARGS} make docker_clean"
+                    sh "${buildArgs} make docker_clean"
                 }
             }
         }

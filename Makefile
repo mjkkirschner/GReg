@@ -5,6 +5,10 @@
 DOCKER_ORG ?= dynamo
 DOCKER_TAG ?= local
 
+BUILD_NAME ?= local
+BUILD_COMMIT ?= local
+DOCKER_ARGS := --build-arg build_name=${BUILD_NAME} --build-arg build_commit=${BUILD_COMMIT}
+
 # TODO: Remove '--exit' in package.json once we've debugged why mocha doesn't exit automatically.
 #   See https://boneskull.com/mocha-v4-nears-release/#mochawontforceexit for some more
 #   information.
@@ -26,7 +30,7 @@ docker_test:
 	docker-compose down
 
 docker_build:
-	docker build -t ${DOCKER_ORG}/dynamopm:${DOCKER_TAG} .
+	docker build ${DOCKER_ARGS} -t ${DOCKER_ORG}/dynamopm:${DOCKER_TAG} .
 
 docker_push:
 	docker push ${DOCKER_ORG}/dynamopm:${DOCKER_TAG}
