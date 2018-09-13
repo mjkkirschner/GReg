@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node src/app.js",
-    "test": "mocha",
+    "test": "mocha --exit",
     "eslint": "eslint --ext .html,.js .",
     "mongo": "docker run --name mongodb -p 27017:27017 -d mongo:latest"
   },
