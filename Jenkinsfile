@@ -10,17 +10,13 @@ currentBuild.displayName = DOCKER_TAG
 
 @Library('PSL@master') _
 
-def buildArgs = "${DOCKER_ARGS} BUILD_NAME=${DOCKER_TAG}"
-
 node('cloud&&centos') { timestamps {
 
     try {
 
         // pull source, then force cleanup of untracked files and dirs
         stage('Pull source') {
-            def git_info = checkout scm
-            def gitCommit = git_info["GIT_COMMIT"]
-            buildArgs = buildArgs + " BUILD_COMMIT=${gitCommit}"
+            checkout scm
             sh "git clean -fxd"
         }
 
@@ -53,25 +49,30 @@ node('cloud&&centos') { timestamps {
         }
 
         stage('Build') {
-            sh "${buildArgs} docker build -t ${DOCKER_ORG}/dynamopm:${DOCKER_TAG} ${DOCKER_ARGS} ."
+            sh "${DOCKER_ARGS} make docker_build"
         }
 
         stage('Test') {
-            sh "npm run test"
-            cobertura(
-                coberturaReportFile: "coverage.xml",
-                lineCoverageTargets: "30,30,0"
-            )
+            sh "make docker_test"
+
+            // TODO: to make cobertura work, we need to generate
+            // a coverage.xml file. See https://istanbul.js.org/
+            // for one possible approach
+            //
+            // cobertura(
+            //     coberturaReportFile: "coverage.xml",
+            //     lineCoverageTargets: "30,30,0"
+            // )
         }
 
         stage('Docker Push') {
             try {
                 docker.withRegistry(DOCKER_REGISTRY, DOCKER_CREDENTIALS) {
-                    sh "${DOCKER_ARGS} docker push ${DOCKER_ORG}/dynamopm:${DOCKER_TAG}"
+                    sh "${DOCKER_ARGS} make docker_push"
                 }
             } finally {
                 stage("Cleanup docker image") {
-                    sh "${DOCKER_ARGS} docker rmi --force ${DOCKER_ORG}/dynamopm:${DOCKER_TAG} || true"
+                    sh "${DOCKER_ARGS} make docker_clean"
                 }
             }
         }
