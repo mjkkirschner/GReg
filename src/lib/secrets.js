@@ -6,7 +6,7 @@ const nconf = require('nconf');
 nconf.env().argv();
 
 // Next, read the values from `config.json`
-nconf.file('ssl/config.json');
+nconf.file('greg/ssl/config.json');
 
 nconf.defaults({
   MAILGUN_LOGIN: 'Your Mailgun SMTP Username',

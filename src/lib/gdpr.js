@@ -133,12 +133,13 @@ exports.handleGDPRRRequest = (req, res) => {
   // has does not match.
   const hash = `sha1hash=${
     crypto.createHmac('sha1', secret)
-      .update(JSON.stringify(req.body))
+    //pass utf-8 explicitly as the default encoding changed in node >6.x
+      .update(JSON.stringify(req.body), 'utf8')
       .digest('hex')}`;
 
   if (userInfo.email !== '' && req.headers['x-adsk-signature'] === hash) {
     // check the user info in the database.
-    UserModel.findOne({ email: userInfo.email }, (err, user) => {
+    UserModel.findOne({ $or: [{ email: userInfo.email }, { oxygen_id : userInfo.id }] }, (err, user) => {
       if (err) {
         console.log('error in finding the user', err);
         res.send(err);
@@ -160,6 +161,7 @@ exports.handleGDPRRRequest = (req, res) => {
     updateGDPRTask(req, res);
     res.status(200).send('Task updated');
   } else {
-    res.status(403).send('Not called from webhook service');
+    console.log("sending 403 - invalid hash ")
+    res.status(403).send('Not called from webhook service, invalid hash');
   }
 };
