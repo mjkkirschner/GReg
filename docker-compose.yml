@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:latest
+
+  greg:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - GREG_DB_URL=mongodb://mongo:27017/
+      - AWSAccessKeyId=fakekeyid
+      - AWSSecretKey=fakesecretkey

@@ -16,3 +16,6 @@ node_modules
 
 test/db
 typings
+
+.env
+.mongo-data

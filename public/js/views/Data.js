@@ -6,36 +6,34 @@ app.DataView = Backbone.View.extend({
   el: '#data_container',
 
   events: {
-		// when exit button clicked, make the needed updates
-		'click .exit-data' : 'exit'	
+    // when exit button clicked, make the needed updates
+    'click .exit-data': 'exit',
   },
 
-  initialize: function() { 
+  initialize() {
  		this.model = new app.Data();
-		app.currentData = this.model;
-    this.listenTo(this.model, 'change', this.render );		
-	},
-
-	exit: function(){
-		this.$el.hide();
+    app.currentData = this.model;
+    this.listenTo(this.model, 'change', this.render);
   },
 
-  render: function() {
+  exit() {
+    this.$el.hide();
+  },
 
-		if ( !this.model.get('current_model') ) return;
-			
-		this.$el.show();
-		
-		if ( this.model.get('current_model').get('name') ){
-			var view = new app.PackageDataView( { model: this.model.get('current_model') } );
-			view.render();
-		} else {
-			var view = new app.AuthorDataView( { model: this.model.get('current_model') } );
-			view.render();		
-		}	
-		
-		return this;
+  render() {
+    if (!this.model.get('current_model')) return;
 
-  }
+    this.$el.show();
+
+    if (this.model.get('current_model').get('name')) {
+      var view = new app.PackageDataView({ model: this.model.get('current_model') });
+      view.render();
+    } else {
+      var view = new app.AuthorDataView({ model: this.model.get('current_model') });
+      view.render();
+    }
+
+    return this;
+  },
 
 });

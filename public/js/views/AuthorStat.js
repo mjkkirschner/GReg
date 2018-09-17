@@ -7,32 +7,30 @@ app.AuthorStatView = Backbone.View.extend({
 
   className: 'stat',
 
-  template: _.template( $('#author-stat-template').html() ),
+  template: _.template($('#author-stat-template').html()),
 
-	events: {
-		'click .package-link' : 'packageClick',
-		'click .author-link': 'authorClick'
-	},
-		
-	packageClick: function(e){
-		var id = $(e.target).attr('pkg-data-id');
-		app.currentData.getPackage(id); 		
-	},
+  events: {
+    'click .package-link': 'packageClick',
+    'click .author-link': 'authorClick',
+  },
 
-	authorClick: function(e){
-		var id = $(e.target).attr('author-data-id');
-		app.currentData.getAuthor(id); 		
-	},
+  packageClick(e) {
+    const id = $(e.target).attr('pkg-data-id');
+    app.currentData.getPackage(id);
+  },
 
-  initialize: function() {
+  authorClick(e) {
+    const id = $(e.target).attr('author-data-id');
+    app.currentData.getAuthor(id);
+  },
+
+  initialize() {
     this.listenTo(this.model, 'change', this.render);
   },
 
-  render: function() {
-    
-		this.$el.html( this.template( this.model.toJSON() ) );
+  render() {
+    this.$el.html(this.template(this.model.toJSON()));
     return this;
-    
-  }
+  },
 
 });
