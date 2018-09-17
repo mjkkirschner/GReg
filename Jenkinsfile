@@ -2,6 +2,7 @@
 DOCKER_ORG='artifactory.dev.adskengineer.net/autodeskcloud'
 DOCKER_REGISTRY='https://artifactory.dev.adskengineer.net/artifactory/docker-local-v2/'
 DOCKER_CREDENTIALS='artifactory-deploy-dev'
+NODE_IMAGE='artifactory.dev.adskengineer.net/quantum-devops/cloudos-v2/base-nodejs8:latest'
 BUILD_VERSION="0.0.${BUILD_NUMBER}"
 SAFE_BRANCH_NAME=BRANCH_NAME.replaceAll('/','-')
 DOCKER_TAG=SAFE_BRANCH_NAME + "-${BUILD_VERSION}"
@@ -25,32 +26,38 @@ node('cloud&&centos') { timestamps {
         }
 
         stage('WhiteSource Scan') {
+            // To scan our dependencies, we need to load them
+            docker.image(NODE_IMAGE).inside('-u root') {
+                sh "npm ci"
+            }
             scan = new ors.security.common_appsec(steps,env)
             scan.run_oast_scan(
-                "repo": "vm",
+                "repo": "package-manager",
                 "branch": env.BRANCH_NAME,
                 "mainline": "master",
                 "team": "Dynamo",
-                "scan_dir": ["${env.WORKSPACE}"],
+                "scan_dir": ["${env.WORKSPACE}/node_modules"],
                 "fail_on_oast": "True"
             )
         }
 
-        stage('Checkmarx Scan') {
-            timeout(time: 120, unit: 'MINUTES') {
-                scan = new ors.security.common_appsec(steps,env)
-                scan.run_sast_scan(
-                    "repo": "vm",
-                    "branch": env.BRANCH_NAME,
-                    "mainline": "master",
-                    "team": "Dynamo",
-                    "scan_dir": env.WORKSPACE,
-                    "fail_on_sast_priority": "True",
-                    "files_exclude": ".*",
-                    "folders_exclude": ".*, test"
-                )
-            }
-        }
+        // TODO: uncomment this once Checkmarx team is configured
+        //
+        // stage('Checkmarx Scan') {
+        //     timeout(time: 120, unit: 'MINUTES') {
+        //         scan = new ors.security.common_appsec(steps,env)
+        //         scan.run_sast_scan(
+        //             "repo": "package-manager",
+        //             "branch": env.BRANCH_NAME,
+        //             "mainline": "master",
+        //             "team": "Dynamo",
+        //             "scan_dir": env.WORKSPACE,
+        //             "fail_on_sast_priority": "True",
+        //             "files_exclude": ".*",
+        //             "folders_exclude": ".*, test, node_modules"
+        //         )
+        //     }
+        // }
 
         stage('Build') {
             sh "${buildArgs} make docker_build"
@@ -112,6 +119,6 @@ def notifyBuild(String buildStatus) {
     withCredentials([[$class: 'StringBinding', credentialsId: 'slack-notify-token', variable: 'mytoken']]) {
         slackSend (color: colorCode, teamDomain: 'autodesk', token: env.mytoken,
             message: "${buildStatus}: Job ${JOB_NAME} [${BUILD_NUMBER}] (<${BUILD_URL}|Build Data>)",
-            channel: '#dynamo-notify')
+            channel: '#dynamo-jenkinsbuild')
     }
 }
