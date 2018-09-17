@@ -1,4 +1,6 @@
-# Graph Registry (GReg)
+# Dynamo Package Manager
+
+[![Build Status](https://master-5.jenkins.autodesk.com/buildStatus/icon?job=Dynamo/PackageManager/master)](https://master-5.jenkins.autodesk.com/job/Dynamo/job/PackageManager/job/master/)
 
 ## Running and testing locally
 
