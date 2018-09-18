@@ -152,6 +152,10 @@ app.put('/whitelist/:pkg_id', passport.authenticate(auth_type, { session: false 
 app.put('/unwhitelist/:pkg_id', passport.authenticate(auth_type, { session: false }), pkg.unwhitelist_by_id);
 app.get('/whitelist', pkg.all_whitelist);
 
+app.get('/health', (req, res) => {
+  res.send({ status: 'running', version: process.env.BUILD_NAME || "development" });
+})
+
 // //////////////////////
 // Statistics update
 // /////////////////////

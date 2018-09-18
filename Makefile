@@ -26,7 +26,7 @@ docker_test:
 	docker-compose build
 	docker-compose up -d mongo
 	sleep 5
-	docker-compose run greg ${TEST_CMD}
+	docker-compose run dynamopm ${TEST_CMD}
 	docker-compose down
 
 docker_build:

@@ -16,5 +16,8 @@ COPY --from=build /src/build /srv
 
 ARG build_name
 LABEL build_name=$build_name
+ENV BUILD_NAME=$build_name
+
 ARG build_commit
 LABEL build_commit=$build_commit
+ENV BUILD_COMMIT=$build_commit
