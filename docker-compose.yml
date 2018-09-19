@@ -5,7 +5,9 @@ services:
     image: mongo:latest
 
   dynamopm:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.dynamopm
     ports:
       - "8080:8080"
     environment:

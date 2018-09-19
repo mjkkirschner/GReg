@@ -30,10 +30,13 @@ docker_test:
 	docker-compose down
 
 docker_build:
-	docker build ${DOCKER_ARGS} -t ${DOCKER_ORG}/dynamopm:${DOCKER_TAG} .
+	docker build ${DOCKER_ARGS} -t ${DOCKER_ORG}/dynamopm:${DOCKER_TAG} -f Dockerfile.dynamopm .
+	docker build ${DOCKER_ARGS} -t ${DOCKER_ORG}/dynamopm-app-test:${DOCKER_TAG} -f Dockerfile.dynamopm-app-test .
 
 docker_push:
 	docker push ${DOCKER_ORG}/dynamopm:${DOCKER_TAG}
+	docker push ${DOCKER_ORG}/dynamopm-app-test:${DOCKER_TAG}
 
 docker_clean:
 	docker rmi -f ${DOCKER_ORG}/dynamopm:${DOCKER_TAG} || true
+	docker rmi -f ${DOCKER_ORG}/dynamopm-app-test:${DOCKER_TAG} || true
