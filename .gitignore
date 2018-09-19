@@ -19,3 +19,6 @@ typings
 
 .env
 .mongo-data
+
+coverage.xml
+build/

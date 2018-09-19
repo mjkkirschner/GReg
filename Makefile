@@ -1,6 +1,7 @@
 # This makefile is invoked by Dockerfile. You probably don't want to
 # invoke these rules manually. Use "docker-compose up" for local testing
 # instead.
+.PHONY: all build clean docker_test docker_build docker_push docker_clean
 
 DOCKER_ORG ?= dynamo
 DOCKER_TAG ?= local
@@ -14,8 +15,12 @@ DOCKER_ARGS := --build-arg build_name=${BUILD_NAME} --build-arg build_commit=${B
 #   information.
 TEST_CMD := npm run test
 
-build:
+all: build
+
+clean:
 	rm -rf build/
+
+build: clean
 	mkdir -p build/
 	cp -a package.json package-lock.json public src test build/
 	cd build && npm ci
@@ -23,7 +28,7 @@ build:
 	cp .env build/ || true
 
 docker_test:
-	docker-compose build
+	DOCKER_ORG=${DOCKER_ORG} DOCKER_TAG=${DOCKER_TAG} docker-compose build
 	docker-compose up -d mongo
 	sleep 5
 	docker-compose run dynamopm ${TEST_CMD}

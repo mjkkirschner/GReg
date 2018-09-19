@@ -25,22 +25,6 @@ node('cloud&&centos') { timestamps {
             sh "git clean -fxd"
         }
 
-        stage('WhiteSource Scan') {
-            // To scan our dependencies, we need to load them
-            docker.image(NODE_IMAGE).inside('-u root') {
-                sh "npm ci"
-            }
-            scan = new ors.security.common_appsec(steps,env)
-            scan.run_oast_scan(
-                "repo": "package-manager",
-                "branch": env.BRANCH_NAME,
-                "mainline": "master",
-                "team": "Dynamo",
-                "scan_dir": ["${env.WORKSPACE}/node_modules"],
-                "fail_on_oast": "True"
-            )
-        }
-
         // TODO: uncomment this once Checkmarx team is configured
         //
         // stage('Checkmarx Scan') {
@@ -59,32 +43,48 @@ node('cloud&&centos') { timestamps {
         //     }
         // }
 
-        stage('Build') {
-            sh "${buildArgs} make docker_build"
-        }
+        try {
+            stage('Build') {
+                sh "${buildArgs} make docker_build"
+            }
 
-        stage('Test') {
-            sh "make docker_test"
+            stage('Test') {
+                sh "${buildArgs} make docker_test"
 
-            // TODO: to make cobertura work, we need to generate
-            // a coverage.xml file. See https://istanbul.js.org/
-            // for one possible approach
-            //
-            // cobertura(
-            //     coberturaReportFile: "coverage.xml",
-            //     lineCoverageTargets: "30,30,0"
-            // )
-        }
+                // TODO: to make cobertura work, we need to generate
+                // a coverage.xml file. See https://istanbul.js.org/
+                // for one possible approach
+                //
+                // cobertura(
+                //     coberturaReportFile: "coverage.xml",
+                //     lineCoverageTargets: "30,30,0"
+                // )
+            }
 
-        stage('Docker Push') {
-            try {
+            stage('WhiteSource Scan') {
+                // To scan our dependencies, we need to load them
+                docker.image(NODE_IMAGE).inside('-u root') {
+                    sh "npm ci"
+                }
+                scan = new ors.security.common_appsec(steps,env)
+                scan.run_oast_scan(
+                    "repo": "package-manager",
+                    "branch": env.BRANCH_NAME,
+                    "mainline": "master",
+                    "team": "Dynamo",
+                    "scan_dir": ["${env.WORKSPACE}/node_modules"],
+                    "fail_on_oast": "True"
+                )
+            }
+
+            stage('Docker Push') {
                 docker.withRegistry(DOCKER_REGISTRY, DOCKER_CREDENTIALS) {
                     sh "${buildArgs} make docker_push"
                 }
-            } finally {
-                stage("Cleanup docker image") {
-                    sh "${buildArgs} make docker_clean"
-                }
+            }
+        } finally {
+            stage("Cleanup docker image") {
+                sh "${buildArgs} make docker_clean"
             }
         }
 
