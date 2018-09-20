@@ -122,8 +122,8 @@ describe('POST /gdprDeleteRequest', () => {
         client_id: "a client id",
         callback_url: "updateTaskURL",
       };
-      const signature = "sha1hash=90ec17a14d60deb97e0c1323133a7d5cfb0da03d";
       const testWebhookPayload = constructMockWebhookPayload(task, authDetails);
+      const signature = generateHash(testWebhookPayload);
 
       testRequest
         .post('/gdprDeleteRequest')
