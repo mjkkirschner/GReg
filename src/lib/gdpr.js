@@ -16,17 +16,19 @@ const secrets = require('./secrets');
 //     });
 // }
 
-
 /**
  * This function sends slack notification.
  * @param {*} message
  */
-function sendSlackNotification(message) {
+function sendSlackNotification(message, testMode) {
   const url = secrets.mailgun.slackWebhook;
   const data = `payload=${JSON.stringify({
     text: message,
   })}`;
-
+  if (testMode) {
+    console.log("SlackMessage:", data);
+    return;
+  }
   agent.post(url)
     .set('accept', 'json')
     .send(data)
@@ -36,11 +38,13 @@ function sendSlackNotification(message) {
 }
 
 /**
- * This function sends email notification
- * @param {*} message
+ * This function sends notifications to notification channels
+ * @param {*} message - message to send
+ * @param {*} testMode - logs instead of sending out real notifications.
+
  */
-function sendNotification(message) {
-  sendSlackNotification(message);
+function sendNotification(message, testMode) {
+  sendSlackNotification(message, testMode);
   // MailGun sometimes doesn't work.
   // smtpTransport().sendMail({
   //     from: "GDPR request",
@@ -57,9 +61,12 @@ function sendNotification(message) {
 /**
  * This function updates the GDPR task. Email / Slack notifications are
  * sent incase of any error.
- * @param {*} req
+ * @param {*} req - original webhook request
+ * @param {*} res - response to send
+ * @param {*} testMode - in testMode this function does not make actual requests.
+
  */
-function updateGDPRTask(req, res) {
+function updateGDPRTask(req, res, testMode) {
   const taskId = req.body.payload.taskId;
   const ret = {};
   ret.statusCode = 200;
@@ -90,6 +97,16 @@ function updateGDPRTask(req, res) {
   });
 
   const authUrl = secrets.forge.auth_url;
+  const updateUrl = secrets.forge.update_url;
+
+  // don't make the request in testmode.
+  if (testMode) {
+    console.log("testMode: calling update GDPR task, payload:");
+    console.log('body:', ret.body);
+    console.log('uri:', updateUrl);
+    return;
+  }
+
   request({
     headers,
     uri: authUrl,
@@ -103,14 +120,13 @@ function updateGDPRTask(req, res) {
       resp = body;
     }
     if (!err && response.statusCode === 200) {
-      const updateUrl = secrets.forge.update_url;
       agent.post(updateUrl)
         .set('Authorization', `Bearer ${resp.access_token}`)
         .set('accept', 'json')
         .send(ret.body)
         .end((error, postRes) => {
-          if (postRes.statusCode !== 200) {
-            sendNotification(`GDPR Package Manager TaskId  ${taskId} Update Failed `, postRes.text);
+          if (postRes.statusCode != 200) {
+            sendNotification(`GDPR Package Manager TaskId  ${taskId} Update Failed, ${postRes.text}`, testMode);
           }
         });
     } else if (err) {
@@ -122,24 +138,32 @@ function updateGDPRTask(req, res) {
 }
 
 /**
- * This function handles the incoming GDPR request
- * @param {*} req TaskID is embedeed inside the request object
- * @param {*} res
+ * This function handles the incoming GDPR request - if in test mode this function
+ * won't actually update tasks or post to slack.
+ * @param {*} req TaskID is embedded inside the request object's body.payload
+ * @param {*} res - response back to caller of the webhook
  */
-exports.handleGDPRRRequest = (req, res) => {
+exports.handleGDPRRequest = function (req, res) {
+  const testMode = process.env.NODE_ENV == "test";
+
   const userInfo = req.body.payload.user_info;
   const secret = secrets.forge.gdpr_id;
   // check whether the hash matches. Ignore the request if
   // has does not match.
   const hash = `sha1hash=${
     crypto.createHmac('sha1', secret)
-    //pass utf-8 explicitly as the default encoding changed in node >6.x
+      // pass utf-8 explicitly as the default encoding changed in node >6.x
       .update(JSON.stringify(req.body), 'utf8')
       .digest('hex')}`;
 
-  if (userInfo.email !== '' && req.headers['x-adsk-signature'] === hash) {
-    // check the user info in the database.
-    UserModel.findOne({ $or: [{ email: userInfo.email }, { oxygen_id : userInfo.id }] }, (err, user) => {
+  // if user email or id is valid and signature is valid then try to find user.
+  if ((userInfo.email != "" || userInfo.oxygen_id != "") && req.headers['x-adsk-signature'] == hash) {
+    // check the user info in the database. - but ignore empty strings that might match.
+    // we don't want to match another user with an empty string for id or email for example.
+    const email = userInfo.email == "" ? "INVALID" : userInfo.email;
+    const oxygen_id = userInfo.id == "" ? "INVALID" : userInfo.id;
+
+    UserModel.findOne({ $or: [{ email }, { oxygen_id }] }, (err, user) => {
       if (err) {
         console.log('error in finding the user', err);
         res.send(err);
@@ -147,21 +171,24 @@ exports.handleGDPRRRequest = (req, res) => {
       // if the user is not found, then update the GDPR task
       if (!user) {
         console.log('user not found');
-        updateGDPRTask(req, res);
+        updateGDPRTask(req, res, testMode);
         res.status(200).send('Task updated');
-      } else {
-        // Send email / slack notifications for valid users
+      }
+      // Send email / slack notifications for valid users
+      else {
         const taskId = req.body.payload.taskId;
         const message = `GDPR Package Manager : Delete request for the task ${taskId}`;
-        sendNotification(message);
-        res.send({ statusCode: 200 });
+        sendNotification(message, testMode);
+        res.status(200).send(message);
       }
     });
-  } else if (req.headers['x-adsk-signature'] === hash) {
-    updateGDPRTask(req, res);
+  }
+  // if both email and ox id are empty, we assume this is not a real user and close the task.
+  else if (userInfo.email == "" && userInfo.id == "" && req.headers['x-adsk-signature'] == hash) {
+    updateGDPRTask(req, res, testMode);
     res.status(200).send('Task updated');
   } else {
-    console.log("sending 403 - invalid hash ")
+    console.log('sending 403 - invalid hash');
     res.status(403).send('Not called from webhook service, invalid hash');
   }
 };

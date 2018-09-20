@@ -8,33 +8,44 @@ const error = require('./error');
 /**
  * Create new dummy user for debugging.  THIS IS NOT PRODUCTION CODE.
  *
- * @param {Object} The parsed and validated json from the client.
+ * @param {*} username of the user
+ * @param {*} email of the user
+ * @param {*} oxygen_id of the user
  * @param {Function} Callback to execute after inserting. The argument is an error object.
  * @api private
  */
 
-const debugUserName = 'test';
 
-exports.initDebugUser = () => {
-  UserModel.findOne({ username: debugUserName }, (err, user) => {
+exports.initDebugUser = (name, email, oxygenId, cb) => {
+  UserModel.findOne({ username: name }, (err, user) => {
     if (err || !user) {
       console.log('Attempting to create new debug user...');
-      const master_user = new UserModel({ username: debugUserName, super_user: true });
+      const master_user = new UserModel({
+        username: name, oxygen_id: oxygenId, email, super_user: true,
+      });
 
       master_user.save((saveErr) => {
         if (saveErr) {
           console.log('Failed to create new debug user...');
         }
         console.log('Successfully created new debug user...');
+        if (cb) {
+          cb(err);
+        }
       });
+    } else if (cb) {
+      cb(err);
     }
   });
 };
 
-exports.cleanupDebugUser = () => {
-  UserModel.findOneAndRemove({ username: debugUserName }, (err, user) => {
+exports.cleanupDebugUser = (name, cb) => {
+  UserModel.findOneAndRemove({ username: name }, (err, user) => {
     if (err || !user) {
       console.log('Could not find the test user for deletion.');
+    }
+    if (cb) {
+      cb(err);
     }
   });
 };

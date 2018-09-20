@@ -185,7 +185,7 @@ function add_pkg(pkg_data, done) {
 
 describe('Package route tests.', () => {
   before((done) => {
-    user.initDebugUser();
+    user.initDebugUser("test", "testemail", "testId");
     done();
   });
 
