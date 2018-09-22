@@ -42,7 +42,7 @@ function generateRandomTask(status) {
     notify_date: "2018-07-27 18:15:14",
     user_o2_id: "AnOxygenID" + getRandId(),
     user_name: "auser" + getRandId(),
-    user_email: "auser" + getRandId() + "@gmail.com",
+    user_email: "auser" + getRandId() + "@example.com",
     app_name: "Some Application",
   };
 }
