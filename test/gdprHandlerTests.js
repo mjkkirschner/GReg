@@ -1,6 +1,4 @@
 
-process.env.NODE_ENV = 'test';
-
 const request = require('supertest');
 const mocha = require('mocha');
 const crypto = require('crypto');
@@ -100,6 +98,7 @@ describe('POST /gdprDeleteRequest', () => {
       testRequest
         .post('/gdprDeleteRequest')
         .set('x-adsk-signature', signature)
+        .set('x-test-mode', 'true')
         .send(testWebhookPayload)
         .expect(403, done);
     });
@@ -128,6 +127,7 @@ describe('POST /gdprDeleteRequest', () => {
       testRequest
         .post('/gdprDeleteRequest')
         .set('x-adsk-signature', signature)
+        .set('x-test-mode', 'true')
         .send(testWebhookPayload)
         .expect("GDPR Package Manager : Delete request for the task " + task.number)
         .expect(200, done);
@@ -157,6 +157,7 @@ describe('POST /gdprDeleteRequest', () => {
       testRequest
         .post('/gdprDeleteRequest')
         .set('x-adsk-signature', signature)
+        .set('x-test-mode', 'true')
         .send(testWebhookPayload)
         .expect("GDPR Package Manager : Delete request for the task " + task.number)
         .expect(200, done);
@@ -185,6 +186,7 @@ describe('POST /gdprDeleteRequest', () => {
       testRequest
         .post('/gdprDeleteRequest')
         .set('x-adsk-signature', signature)
+        .set('x-test-mode', 'true')
         .send(testWebhookPayload)
         .expect("Task updated")
         .expect(200, done);
@@ -215,6 +217,7 @@ describe('POST /gdprDeleteRequest', () => {
         testRequest
           .post('/gdprDeleteRequest')
           .set('x-adsk-signature', signature)
+          .set('x-test-mode', 'true')
           .send(testWebhookPayload)
           .expect("Task updated")
           .expect(200, done);
@@ -246,6 +249,7 @@ describe('POST /gdprDeleteRequest', () => {
         testRequest
           .post('/gdprDeleteRequest')
           .set('x-adsk-signature', signature)
+          .set('x-test-mode', 'true')
           .send(testWebhookPayload)
           .expect("Task updated")
           .expect(200, done);
@@ -276,6 +280,7 @@ describe('POST /gdprDeleteRequest', () => {
       testRequest
         .post('/gdprDeleteRequest')
         .set('x-adsk-signature', signature)
+        .set('x-test-mode', 'true')
         .send(testWebhookPayload)
         .expect("Task updated")
         .expect(200, done);
@@ -305,6 +310,7 @@ describe('POST /gdprDeleteRequest', () => {
         testRequest
           .post('/gdprDeleteRequest')
           .set('x-adsk-signature', signature)
+          .set('x-test-mode', 'true')
           .send(testWebhookPayload)
           .expect("Task updated")
           .expect(200, done);

@@ -144,7 +144,7 @@ function updateGDPRTask(req, res, testMode) {
  * @param {*} res - response back to caller of the webhook
  */
 exports.handleGDPRRequest = function (req, res) {
-  const testMode = process.env.NODE_ENV == "test";
+  const testMode = req.headers['x-test-mode'] == "true";
 
   const userInfo = req.body.payload.user_info;
   const secret = secrets.forge.gdpr_id;
