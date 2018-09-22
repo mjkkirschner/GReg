@@ -172,7 +172,7 @@ setInterval(() => {
 // //////////////////////
 // GDPR
 // //////////////////////
-app.post('/gdprDeleteRequest', gdpr.handleGDPRRequest);
+app.post('/gdprDeleteRequest', (res, req) => { gdpr.handleGDPRRequest(res, req, gdpr.sendNotification) });
 
 // //////////////////////
 // Server

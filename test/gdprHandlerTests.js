@@ -106,7 +106,7 @@ describe('POST /gdprDeleteRequest', () => {
 
   it('should not return 403 if user_email or name includes non ASCII characters', (done) => {
     const task = generateRandomTask();
-    task.user_email = "ЕЀЁName@gmail.com";
+    task.user_email = "ЕЀЁName@example.com";
     task.user_name = "ЕЀЁName";
     task.user_o2_id = "aStableID";
     task.number = "aStableID";
@@ -136,7 +136,7 @@ describe('POST /gdprDeleteRequest', () => {
 
   it('should respond with 200 and open task if user has email and oxygen id and is found', (done) => {
     const task = generateRandomTask();
-    task.user_email = "aValidEmail@gmail.com";
+    task.user_email = "aValidEmail@example.com";
     task.user_name = "aValidName";
     task.user_o2_id = "ao2StableID";
     task.number = "aStableID";
@@ -164,9 +164,68 @@ describe('POST /gdprDeleteRequest', () => {
     });
   });
 
+  it('should respond with 200 and open task if user has email only and is found', (done) => {
+    const task = generateRandomTask();
+    task.user_email = "aValidEmail@example.com";
+    task.user_name = "aValidName";
+    task.user_o2_id = "";
+    task.number = "aStableID";
+
+    const name = task.user_name;
+    const email = task.user_email;
+    const id = task.user_o2_id;
+    // generate test user.
+    user.initDebugUser(name, email, id, () => {
+      const authDetails = {
+        webhook_endpoint: "gdprDeleteRequestHandler",
+        client_id: "a client id",
+        callback_url: "updateTaskURL",
+      };
+      const testWebhookPayload = constructMockWebhookPayload(task, authDetails);
+      const signature = generateHash(testWebhookPayload);
+
+      testRequest
+        .post('/gdprDeleteRequest')
+        .set('x-adsk-signature', signature)
+        .set('x-test-mode', 'true')
+        .send(testWebhookPayload)
+        .expect("GDPR Package Manager : Delete request for the task " + task.number)
+        .expect(200, done);
+    });
+  });
+
+  it('should respond with 200 and open task if user has ox-id only and is found', (done) => {
+    const task = generateRandomTask();
+    task.user_email = "";
+    task.user_o2_id = "anOXID";
+    task.number = "aStableID";
+
+    const name = task.user_name;
+    const email = task.user_email;
+    const id = task.user_o2_id;
+    // generate test user.
+    user.initDebugUser(name, email, id, () => {
+      const authDetails = {
+        webhook_endpoint: "gdprDeleteRequestHandler",
+        client_id: "a client id",
+        callback_url: "updateTaskURL",
+      };
+      const testWebhookPayload = constructMockWebhookPayload(task, authDetails);
+      const signature = generateHash(testWebhookPayload);
+
+      testRequest
+        .post('/gdprDeleteRequest')
+        .set('x-adsk-signature', signature)
+        .set('x-test-mode', 'true')
+        .send(testWebhookPayload)
+        .expect("GDPR Package Manager : Delete request for the task " + task.number)
+        .expect(200, done);
+    });
+  });
+
   it('should close task if user is not in database', (done) => {
     const task = generateRandomTask();
-    task.user_email = "aValidEmail@gmail.com";
+    task.user_email = "aValidEmail@example.com";
     task.user_name = "aValidName";
     task.user_o2_id = "ao2StableID";
     task.number = "aStableID";
@@ -228,7 +287,7 @@ describe('POST /gdprDeleteRequest', () => {
   it(`should close task if user is not in database even
     if they have empty o2-id and db contains another user with empty o2-id`, (done) => {
     const task = generateRandomTask();
-    task.user_email = "aValidEmail@gmailcom";
+    task.user_email = "aValidEmail@examplecom";
     task.user_name = "aValidName";
     task.user_o2_id = "";
     task.number = "aStableID";

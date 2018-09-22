@@ -43,7 +43,7 @@ function sendSlackNotification(message, testMode) {
  * @param {*} testMode - logs instead of sending out real notifications.
 
  */
-function sendNotification(message, testMode) {
+exports.sendNotification = function(message, testMode) {
   sendSlackNotification(message, testMode);
   // MailGun sometimes doesn't work.
   // smtpTransport().sendMail({
@@ -61,12 +61,15 @@ function sendNotification(message, testMode) {
 /**
  * This function updates the GDPR task. Email / Slack notifications are
  * sent incase of any error.
- * @param {*} req - original webhook request
- * @param {*} res - response to send
- * @param {*} testMode - in testMode this function does not make actual requests.
+ * @param {*} req - original webhook request - if it contains the x-test-mode header, real requests will not be made.
+ * @param {*} res - response to send to client.
+ * @param {Function} notificationCallback - a function of the form (message, testmode) which is 
+ * called to send notifications for errors in updating tasks.
 
  */
-function updateGDPRTask(req, res, testMode) {
+function updateGDPRTask(req, res, notificationCallback) {
+  const testMode = req.headers['x-test-mode'] == "true";
+
   const taskId = req.body.payload.taskId;
   const ret = {};
   ret.statusCode = 200;
@@ -125,8 +128,8 @@ function updateGDPRTask(req, res, testMode) {
         .set('accept', 'json')
         .send(ret.body)
         .end((error, postRes) => {
-          if (postRes.statusCode != 200) {
-            sendNotification(`GDPR Package Manager TaskId  ${taskId} Update Failed, ${postRes.text}`, testMode);
+          if (postRes.statusCode != 200 && notificationCallback) {
+            notificationCallback(`GDPR Package Manager TaskId  ${taskId} Update Failed, ${postRes.text}`, testMode);
           }
         });
     } else if (err) {
@@ -139,11 +142,11 @@ function updateGDPRTask(req, res, testMode) {
 
 /**
  * This function handles the incoming GDPR request - if in test mode this function
- * won't actually update tasks or post to slack.
+ * won't actually update tasks or post to slack. (x-test-mode = 'true' header).
  * @param {*} req TaskID is embedded inside the request object's body.payload
  * @param {*} res - response back to caller of the webhook
  */
-exports.handleGDPRRequest = function (req, res) {
+exports.handleGDPRRequest = function (req, res, notificationCallback) {
   const testMode = req.headers['x-test-mode'] == "true";
 
   const userInfo = req.body.payload.user_info;
@@ -171,21 +174,23 @@ exports.handleGDPRRequest = function (req, res) {
       // if the user is not found, then update the GDPR task
       if (!user) {
         console.log('user not found');
-        updateGDPRTask(req, res, testMode);
+        updateGDPRTask(req, res, notificationCallback);
         res.status(200).send('Task updated');
       }
       // Send email / slack notifications for valid users
       else {
         const taskId = req.body.payload.taskId;
         const message = `GDPR Package Manager : Delete request for the task ${taskId}`;
-        sendNotification(message, testMode);
+        if (notificationCallback) {
+          notificationCallback(message, testMode);
+        }
         res.status(200).send(message);
       }
     });
   }
   // if both email and ox id are empty, we assume this is not a real user and close the task.
   else if (userInfo.email == "" && userInfo.id == "" && req.headers['x-adsk-signature'] == hash) {
-    updateGDPRTask(req, res, testMode);
+    updateGDPRTask(req, res, notificationCallback);
     res.status(200).send('Task updated');
   } else {
     console.log('sending 403 - invalid hash');
